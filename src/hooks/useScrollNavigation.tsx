@@ -7,7 +7,6 @@ const SCROLL_THRESHOLD = 100; // Amount of scroll needed to trigger navigation
 export const useScrollNavigation = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const lastScrollY = useRef(0);
   const isNavigating = useRef(false);
   const accumulatedDelta = useRef(0);
 
@@ -23,7 +22,6 @@ export const useScrollNavigation = () => {
       // Check if accumulated scroll passes threshold
       if (accumulatedDelta.current > SCROLL_THRESHOLD && currentPageIndex < pages.length - 1) {
         // Scrolling down - go to next page
-        console.log('Navigating to next page:', pages[currentPageIndex + 1]);
         isNavigating.current = true;
         navigate(pages[currentPageIndex + 1]);
         // Reset accumulated delta
@@ -33,7 +31,6 @@ export const useScrollNavigation = () => {
         }, 1000);
       } else if (accumulatedDelta.current < -SCROLL_THRESHOLD && currentPageIndex > 0) {
         // Scrolling up - go to previous page
-        console.log('Navigating to previous page:', pages[currentPageIndex - 1]);
         isNavigating.current = true;
         navigate(pages[currentPageIndex - 1]);
         // Reset accumulated delta

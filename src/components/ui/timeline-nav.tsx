@@ -1,0 +1,80 @@
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Button } from './button';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+const pages = ['/', '/story', '/adventure', '/treasure'];
+const pageNames = ['Introduction', 'Story', 'Adventure', 'Treasure'];
+
+export function TimelineNav() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const currentPageIndex = pages.indexOf(location.pathname);
+
+  const goToNextPage = () => {
+    if (currentPageIndex < pages.length - 1) {
+      navigate(pages[currentPageIndex + 1]);
+    }
+  };
+
+  const goToPreviousPage = () => {
+    if (currentPageIndex > 0) {
+      navigate(pages[currentPageIndex - 1]);
+    }
+  };
+
+  const progress = ((currentPageIndex + 1) / pages.length) * 100;
+
+  return (
+    <nav className="fixed top-0 left-0 right-0 z-50 h-14 bg-background/80 backdrop-blur-sm border-b">
+      <div className="container h-full mx-auto px-4">
+        <div className="flex items-center justify-between gap-2 h-full">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={goToPreviousPage}
+            disabled={currentPageIndex === 0}
+            className="shrink-0 h-8 w-8 p-0"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+
+          <div className="flex-1 relative max-w-md mx-auto">
+            <div className="h-1 bg-muted rounded-full overflow-hidden">
+              <div
+                className="h-full bg-primary transition-all duration-300 ease-in-out"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+            <div className="flex justify-between mt-1">
+              {pageNames.map((name, index) => (
+                <button
+                  key={name}
+                  onClick={() => navigate(pages[index])}
+                  className={cn(
+                    "text-[10px] transition-colors px-1 py-0.5",
+                    index === currentPageIndex
+                      ? "text-primary font-medium"
+                      : "text-muted-foreground hover:text-primary"
+                  )}
+                >
+                  {name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={goToNextPage}
+            disabled={currentPageIndex === pages.length - 1}
+            className="shrink-0 h-8 w-8 p-0"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    </nav>
+  );
+} 

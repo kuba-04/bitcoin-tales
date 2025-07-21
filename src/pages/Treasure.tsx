@@ -1,10 +1,6 @@
-import { useScrollNavigation } from "@/hooks/useScrollNavigation";
-
 const Treasure = () => {
-  useScrollNavigation();
-  
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
+    <div className="min-h-[calc(100vh-6rem)] flex items-center justify-center bg-background text-foreground">
       <div className="text-center space-y-6 p-8">
         <h1 className="text-4xl font-bold text-foreground">Chapter 3: The Discovery</h1>
         <p className="text-xl text-muted-foreground">The treasure awaits...</p>
@@ -15,7 +11,7 @@ const Treasure = () => {
             ethereal light. But the greatest treasures are not always made of gold...
           </p>
           <p className="text-muted-foreground">
-            The tale concludes here, but new adventures await. Scroll to begin anew!
+            The tale concludes here, but new adventures await. Click the home button to begin anew!
           </p>
         </div>
       </div>

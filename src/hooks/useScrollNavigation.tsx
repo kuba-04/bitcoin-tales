@@ -1,56 +1,28 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const pages = ['/', '/story', '/adventure', '/treasure'];
-const SCROLL_THRESHOLD = 100; // Amount of scroll needed to trigger navigation
 
-export const useScrollNavigation = () => {
+export const useNavigation = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const isNavigating = useRef(false);
-  const accumulatedDelta = useRef(0);
-
+  
   useEffect(() => {
-    const handleWheel = (e: WheelEvent) => {
-      if (isNavigating.current) return;
-      
+    const handleKeyDown = (e: KeyboardEvent) => {
       const currentPageIndex = pages.indexOf(location.pathname);
       
-      // Accumulate scroll delta
-      accumulatedDelta.current += e.deltaY;
-
-      // Check if accumulated scroll passes threshold
-      if (accumulatedDelta.current > SCROLL_THRESHOLD && currentPageIndex < pages.length - 1) {
-        // Scrolling down - go to next page
-        isNavigating.current = true;
+      // Handle arrow key navigation
+      if (e.key === 'ArrowRight' && currentPageIndex < pages.length - 1) {
         navigate(pages[currentPageIndex + 1]);
-        // Reset accumulated delta
-        accumulatedDelta.current = 0;
-        setTimeout(() => {
-          isNavigating.current = false;
-        }, 1000);
-      } else if (accumulatedDelta.current < -SCROLL_THRESHOLD && currentPageIndex > 0) {
-        // Scrolling up - go to previous page
-        isNavigating.current = true;
+      } else if (e.key === 'ArrowLeft' && currentPageIndex > 0) {
         navigate(pages[currentPageIndex - 1]);
-        // Reset accumulated delta
-        accumulatedDelta.current = 0;
-        setTimeout(() => {
-          isNavigating.current = false;
-        }, 1000);
-      }
-
-      // Reset accumulated delta if user changes scroll direction
-      if ((e.deltaY > 0 && accumulatedDelta.current < 0) || 
-          (e.deltaY < 0 && accumulatedDelta.current > 0)) {
-        accumulatedDelta.current = e.deltaY;
       }
     };
 
-    window.addEventListener('wheel', handleWheel, { passive: false });
+    window.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      window.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('keydown', handleKeyDown);
     };
   }, [navigate, location.pathname]);
 

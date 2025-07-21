@@ -1,7 +1,7 @@
 #root {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 0; /* Remove padding as we'll handle it in the page container */
   text-align: center;
 }
 
@@ -39,4 +39,23 @@
 
 .read-the-docs {
   color: #888;
+}
+
+.page-container {
+  min-height: 100vh;
+  padding-top: 6rem; /* Increased padding at the top to clear the nav bar */
+  padding-bottom: 2rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Add styles for the main content area */
+.main-content {
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 1rem;
+  flex: 1;
 }

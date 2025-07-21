@@ -1,4 +1,8 @@
+import { useScrollNavigation } from "@/hooks/useScrollNavigation";
+
 const Index = () => {
+  useScrollNavigation();
+  
   return (
     <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
       <div className="text-center space-y-6 p-8">

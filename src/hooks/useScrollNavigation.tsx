@@ -6,69 +6,38 @@ const pages = ['/', '/story', '/adventure', '/treasure'];
 export const useScrollNavigation = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const isNavigatingRef = useRef(false);
+  const lastScrollY = useRef(0);
+  const isNavigating = useRef(false);
 
   useEffect(() => {
-    let lastScrollY = window.scrollY;
-    let ticking = false;
-
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      const scrollDelta = currentScrollY - lastScrollY;
+    const handleWheel = (e: WheelEvent) => {
+      if (isNavigating.current) return;
       
-      // Only handle significant scroll movements
-      if (Math.abs(scrollDelta) < 50 || isNavigatingRef.current) {
-        lastScrollY = currentScrollY;
-        return;
-      }
-
-      // Clear existing timeout
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
-
-      // Set a timeout to handle navigation after scroll stops
-      scrollTimeoutRef.current = setTimeout(() => {
-        const currentPageIndex = pages.indexOf(location.pathname);
-        
-        if (scrollDelta > 0 && currentPageIndex < pages.length - 1) {
-          // Scrolling down - go to next page
-          isNavigatingRef.current = true;
-          navigate(pages[currentPageIndex + 1]);
-          setTimeout(() => {
-            isNavigatingRef.current = false;
-          }, 1000);
-        } else if (scrollDelta < 0 && currentPageIndex > 0) {
-          // Scrolling up - go to previous page
-          isNavigatingRef.current = true;
-          navigate(pages[currentPageIndex - 1]);
-          setTimeout(() => {
-            isNavigatingRef.current = false;
-          }, 1000);
-        }
-        
-        lastScrollY = currentScrollY;
-      }, 300); // Wait 300ms after scroll stops
-    };
-
-    const requestTick = () => {
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          handleScroll();
-          ticking = false;
-        });
-        ticking = true;
+      const currentPageIndex = pages.indexOf(location.pathname);
+      
+      if (e.deltaY > 0 && currentPageIndex < pages.length - 1) {
+        // Scrolling down - go to next page
+        console.log('Navigating to next page:', pages[currentPageIndex + 1]);
+        isNavigating.current = true;
+        navigate(pages[currentPageIndex + 1]);
+        setTimeout(() => {
+          isNavigating.current = false;
+        }, 1000);
+      } else if (e.deltaY < 0 && currentPageIndex > 0) {
+        // Scrolling up - go to previous page
+        console.log('Navigating to previous page:', pages[currentPageIndex - 1]);
+        isNavigating.current = true;
+        navigate(pages[currentPageIndex - 1]);
+        setTimeout(() => {
+          isNavigating.current = false;
+        }, 1000);
       }
     };
 
-    window.addEventListener('scroll', requestTick, { passive: true });
+    window.addEventListener('wheel', handleWheel, { passive: false });
 
     return () => {
-      window.removeEventListener('scroll', requestTick);
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
+      window.removeEventListener('wheel', handleWheel);
     };
   }, [navigate, location.pathname]);
 

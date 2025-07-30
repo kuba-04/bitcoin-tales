@@ -6,7 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { TimelineNav } from "@/components/ui/timeline-nav";
 import { useNavigation } from "@/hooks/useScrollNavigation";
 import Index from "./pages/Index";
-import Story from "./pages/Story";
+import Mining from "./pages/Mining";
+import Merchant from "./pages/Merchant";
 import Adventure from "./pages/Adventure";
 import Treasure from "./pages/Treasure";
 import NotFound from "./pages/NotFound";
@@ -23,8 +24,9 @@ const AppContent = () => {
         <div className="main-content">
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/story" element={<Story />} />
-            <Route path="/adventure" element={<Adventure />} />
+            <Route path="/mining" element={<Mining />} />
+            <Route path="/merchant" element={<Merchant />} />
+            <Route path="/exchange" element={<Adventure />} />
             <Route path="/treasure" element={<Treasure />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

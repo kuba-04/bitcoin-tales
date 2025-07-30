@@ -32,7 +32,7 @@ const Adventure = () => {
       {/* Header Section - Add margin-top to account for fixed nav */}
       <div className="max-w-3xl mx-auto text-center mb-12" style={{ marginTop: 'calc(3.5rem + 2rem)' }}>
         <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-primary/80 to-primary bg-clip-text text-transparent">
-          Mike's High-Stakes Mining Adventure
+          Chapter 3: Exchange of goods
         </h1>
         <p className="mt-4 text-lg text-muted-foreground">
           Join Mike on his journey to mine Bitcoin and make delicious purchases from Mary's stand!
@@ -44,11 +44,13 @@ const Adventure = () => {
         {/* Left Side - Mining */}
         <div className="bg-card/50 backdrop-blur-sm border rounded-xl shadow-lg overflow-hidden">
           <div className="p-6 pb-4 border-b bg-muted/30">
-            <h2 className="text-2xl font-semibold">The Mining Operation</h2>
-            <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+            <h2 className="text-2xl font-semibold">Mike's Mining Operations Ltd.</h2>
+            <img src="../assets/mike_face_c.png" alt="Mike" className="h-30 mb-4 mt-10 mx-auto block" />
+            <span className="mt-2 text-sm text-muted-foreground leading-relaxed">
+            All that mining activity made Mike incredibly hungry. Fortunately, not far from him a Mary's stand is located.
               Help Mike mine Bitcoin by operating his powerful computers. But be careful - 
               mining consumes energy and success isn't guaranteed!
-            </p>
+            </span>
           </div>
           <div className="p-6">
             <MiningSection
@@ -64,9 +66,10 @@ const Adventure = () => {
         <div className="bg-card/50 backdrop-blur-sm border rounded-xl shadow-lg overflow-hidden">
           <div className="p-6 pb-4 border-b bg-muted/30">
             <h2 className="text-2xl font-semibold">Mary's Fresh & Local Stand</h2>
+            <img src="../assets/mary_face_c.png" alt="Mary" className="h-30 mb-4 mt-10 mx-auto block" />
             <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-              After all that mining, it's time for a delicious treat! Visit Mary's stand to 
-              spend your hard-earned Bitcoin.
+              Mary offers a variety of healthy and delicious goods.
+              Help Mike choose something from her stand.
             </p>
           </div>
           <div className="p-6">

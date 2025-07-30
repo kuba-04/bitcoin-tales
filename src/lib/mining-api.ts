@@ -21,6 +21,7 @@ export interface MenuItem {
   name: string;
   price: number;
   description: string;
+  image: string;
 }
 
 // Mock menu items
@@ -29,31 +30,36 @@ export const MENU_ITEMS: MenuItem[] = [
     id: 'mango-salad',
     name: 'Mango Salad',
     price: 20,
-    description: 'A refreshing and exotic treat'
+    description: 'A refreshing and exotic treat',
+    image: '/assets/mangosalad.jpg'
   },
   {
     id: 'banana-bread',
     name: 'Banana Bread',
     price: 12,
-    description: 'A hearty and comforting loaf'
+    description: 'A hearty and comforting loaf',
+    image: '/assets/bananabread.jpg'
   },
   {
     id: 'corn-tortillas',
     name: 'Corn Tortillas',
     price: 8,
-    description: 'A simple and savory snack'
+    description: 'A simple and savory snack',
+    image: '/assets/tortillas.webp'
   },
   {
     id: 'apple-pie',
     name: 'Apple Pie',
     price: 15,
-    description: 'A classic, sweet indulgence'
+    description: 'A classic, sweet indulgence',
+    image: '/assets/applepie.webp'
   },
   {
     id: 'hummus',
     name: 'Hummus',
     price: 4,
-    description: 'A healthy and flavorful dip'
+    description: 'A healthy and flavorful dip',
+    image: '/assets/hummus.webp'
   }
 ];
 

@@ -40,9 +40,12 @@ export const MarysStand = ({ balance, onPurchase }: MarysStandProps) => {
             key={item.id}
             className="flex items-center justify-between p-2 border rounded bg-accent/5 hover:bg-accent/10 transition-colors"
           >
-            <div className="min-w-0">
-              <h3 className="text-sm font-medium truncate">{item.name}</h3>
-              <p className="text-xs text-muted-foreground truncate">{item.description}</p>
+            <div className="flex items-center gap-2">
+              <img src={item.image} alt={item.name} className="w-10 h-10" />
+              <div className="min-w-0 mr-10">
+                <h3 className="text-sm font-medium truncate">{item.name}</h3>
+                <p className="text-xs text-muted-foreground truncate">{item.description}</p>
+              </div>
             </div>
             <div className="text-right flex flex-col items-end gap-1 ml-2">
               <div className="text-xs font-mono">{item.price} BTC</div>

@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-const pages = ['/', '/story', '/adventure', '/treasure'];
+const pages = ['/', '/mining', '/merchant', '/exchange', '/treasure'];
 
 export const useNavigation = () => {
   const navigate = useNavigate();

@@ -3,8 +3,8 @@ import { Button } from './button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const pages = ['/', '/story', '/adventure', '/treasure'];
-const pageNames = ['Introduction', 'Story', 'Adventure', 'Treasure'];
+const pages = ['/', '/mining', '/merchant', '/exchange', '/treasure'];
+const pageNames = ['Introduction', 'Mining', 'Merchant', 'Exchange', 'Treasure'];
 
 export function TimelineNav() {
   const location = useLocation();

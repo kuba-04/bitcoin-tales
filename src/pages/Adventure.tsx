@@ -3,11 +3,70 @@ import { MiningSection } from "@/components/MiningSection";
 import { MarysStand } from "@/components/MarysStand";
 import { MempoolViewer } from "@/components/MempoolViewer";
 import type { Transaction } from "@/lib/mining-api";
+import { createWallet, createAddress, WalletType } from "@/lib/mining-api";
+import { Button } from "@/components/ui/button";
+import { GuidePopup } from "@/components/GuidePopup";
 
 const Adventure = () => {
   const [balance, setBalance] = useState(0);
   const [energyCost, setEnergyCost] = useState(0);
   const [pendingTransaction, setPendingTransaction] = useState<Transaction | null>(null);
+  const [mikeWallet, setMikeWallet] = useState<string | null>(null);
+  const [maryWallet, setMaryWallet] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<{ mike: boolean; mary: boolean; mikeAddress: boolean; maryAddress: boolean }>({ 
+    mike: false, 
+    mary: false,
+    mikeAddress: false,
+    maryAddress: false
+  });
+  const [addresses, setAddresses] = useState<{ mike: string; mary: string }>({ mike: "", mary: "" });
+
+  const generateWalletName = (type: WalletType) => {
+    const prefix = type === WalletType.MINER ? "miner" : "merchant";
+    const uuid = crypto.randomUUID();
+    return `${prefix}_${uuid}`;
+  };
+
+  const handleCreateAddress = async (type: 'mike' | 'mary') => {
+    if (!mikeWallet || !maryWallet) return;
+    
+    const walletName = type === 'mike' ? mikeWallet : maryWallet;
+    const addressName = type === 'mike' ? "Mining Rewards" : "Store Income";
+    const loadingKey = type === 'mike' ? 'mikeAddress' : 'maryAddress';
+    
+    try {
+      setIsLoading(prev => ({ ...prev, [loadingKey]: true }));
+      const { address } = await createAddress(walletName, addressName);
+      setAddresses(prev => ({ ...prev, [type]: address }));
+    } catch (error) {
+      console.error(`Failed to create address for ${type}:`, error);
+    } finally {
+      setIsLoading(prev => ({ ...prev, [loadingKey]: false }));
+    }
+  };
+
+  const handleCreateWallet = async (type: WalletType) => {
+    try {
+      const key = type === WalletType.MINER ? "mike" : "mary";
+      setIsLoading(prev => ({ ...prev, [key]: true }));
+      
+      const walletName = generateWalletName(type);
+      const { address } = await createWallet(walletName);
+
+      if (type === WalletType.MINER) {
+        setMikeWallet(address);
+        console.log("Mike's wallet created:", address);
+      } else {
+        setMaryWallet(address);
+        console.log("Mary's wallet created:", address);
+      }
+    } catch (error) {
+      console.error(`Failed to create wallet for ${type}:`, error);
+    } finally {
+      const key = type === WalletType.MINER ? "mike" : "mary";
+      setIsLoading(prev => ({ ...prev, [key]: false }));
+    }
+  };
   
   const handleBalanceChange = (amount: number) => {
     setBalance(prev => prev + amount);
@@ -29,6 +88,11 @@ const Adventure = () => {
 
   return (
     <div className="container mx-auto px-4 min-h-screen">
+      {/* Guide Popup */}
+      <GuidePopup 
+        isMikeWalletCreated={mikeWallet !== null}
+        isMaryWalletCreated={maryWallet !== null}
+      />
       {/* Header Section - Add margin-top to account for fixed nav */}
       <div className="max-w-3xl mx-auto text-center mb-12" style={{ marginTop: 'calc(3.5rem + 2rem)' }}>
         <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-primary/80 to-primary bg-clip-text text-transparent">
@@ -51,6 +115,42 @@ const Adventure = () => {
               Help Mike mine Bitcoin by operating his powerful computers. But be careful - 
               mining consumes energy and success isn't guaranteed!
             </span>
+            <div className="mt-4">
+              <Button
+                onClick={() => handleCreateWallet(WalletType.MINER)}
+                disabled={isLoading.mike || mikeWallet !== null}
+                className="w-full"
+              >
+                {isLoading.mike ? "Creating wallet..." : mikeWallet ? "Wallet created!" : "Create Mike's wallet"}
+              </Button>
+              {mikeWallet && (
+                <>
+                  <p className="mt-2 text-xs text-muted-foreground break-all">
+                    Wallet address: {mikeWallet}
+                  </p>
+                  {mikeWallet && maryWallet && (
+                    <>
+                      <Button
+                        onClick={() => handleCreateAddress('mike')}
+                        disabled={isLoading.mikeAddress || addresses.mike !== ""}
+                        className="w-full mt-2"
+                      >
+                        {isLoading.mikeAddress 
+                          ? "Creating address..." 
+                          : addresses.mike 
+                            ? "✅ Mike's address created!" 
+                            : "Create Mike's address"}
+                      </Button>
+                      {addresses.mike && (
+                        <p className="mt-2 text-xs text-muted-foreground break-all">
+                          Mike's address: {addresses.mike}
+                        </p>
+                      )}
+                    </>
+                  )}
+                </>
+              )}
+            </div>
           </div>
           <div className="p-6">
             <MiningSection
@@ -71,6 +171,42 @@ const Adventure = () => {
               Mary offers a variety of healthy and delicious goods.
               Help Mike choose something from her stand.
             </p>
+            <div className="mt-4">
+              <Button
+                onClick={() => handleCreateWallet(WalletType.MERCHANT)}
+                disabled={isLoading.mary || maryWallet !== null}
+                className="w-full"
+              >
+                {isLoading.mary ? "Creating wallet..." : maryWallet ? "Wallet created!" : "Create Mary's wallet"}
+              </Button>
+              {maryWallet && (
+                <>
+                  <p className="mt-2 text-xs text-muted-foreground break-all">
+                    Wallet address: {maryWallet}
+                  </p>
+                  {mikeWallet && maryWallet && (
+                    <>
+                      <Button
+                        onClick={() => handleCreateAddress('mary')}
+                        disabled={isLoading.maryAddress || addresses.mary !== ""}
+                        className="w-full mt-2"
+                      >
+                        {isLoading.maryAddress 
+                          ? "Creating address..." 
+                          : addresses.mary 
+                            ? "✅ Mary's address created!" 
+                            : "Create Mary's address"}
+                      </Button>
+                      {addresses.mary && (
+                        <p className="mt-2 text-xs text-muted-foreground break-all">
+                          Mary's address: {addresses.mary}
+                        </p>
+                      )}
+                    </>
+                  )}
+                </>
+              )}
+            </div>
           </div>
           <div className="p-6">
             <MarysStand

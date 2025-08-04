@@ -1,4 +1,9 @@
 // Types
+export enum WalletType {
+  MINER = "Miner",
+  MERCHANT = "Merchant"
+}
+
 export interface Transaction {
   id: string;
   from: string;
@@ -64,6 +69,24 @@ export const MENU_ITEMS: MenuItem[] = [
 ];
 
 // Mock API functions
+export const createWallet = async (name: string): Promise<{ address: string }> => {
+  const response = await fetch('http://127.0.0.1:8021/wallet', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ name }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to create wallet: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+
+  return { address: data.name };
+};
+
 export const mineBlock = async (): Promise<MiningResult> => {
   // Simulate mining delay
   await new Promise(resolve => setTimeout(resolve, 2000));
@@ -99,6 +122,26 @@ export const createTransaction = async (
     status: 'pending',
     timestamp: Date.now()
   };
+};
+
+export const createAddress = async (walletName: string, addressName: string): Promise<{ address: string }> => {
+  const response = await fetch('http://127.0.0.1:8021/address', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      wallet_name: walletName,
+      name: addressName
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to create address: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return { address: data.address };
 };
 
 export const confirmTransaction = async (

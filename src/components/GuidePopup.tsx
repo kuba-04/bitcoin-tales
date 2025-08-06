@@ -5,28 +5,47 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 interface GuidePopupProps {
   isMikeWalletCreated: boolean;
   isMaryWalletCreated: boolean;
+  mikeAddress: string;
+  maryAddress: string;
 }
 
 export const GuidePopup = ({ 
   isMikeWalletCreated, 
-  isMaryWalletCreated 
+  isMaryWalletCreated,
+  mikeAddress,
+  maryAddress
 }: GuidePopupProps) => {
   const [isOpen, setIsOpen] = useState(true);
-  const [lastWalletState, setLastWalletState] = useState({ mike: false, mary: false });
+  const [lastState, setLastState] = useState({
+    mikeWallet: false,
+    maryWallet: false,
+    mikeAddress: "",
+    maryAddress: ""
+  });
 
-  // Reopen the popup when both wallets are created
+  // Reopen the popup when both wallets are created or both addresses are generated
   useEffect(() => {
     const bothWalletsJustCreated = 
       isMikeWalletCreated && 
       isMaryWalletCreated && 
-      (!lastWalletState.mike || !lastWalletState.mary);
+      (!lastState.mikeWallet || !lastState.maryWallet);
+
+    const bothAddressesJustCreated =
+      mikeAddress !== "" &&
+      maryAddress !== "" &&
+      (lastState.mikeAddress === "" || lastState.maryAddress === "");
     
-    if (bothWalletsJustCreated) {
+    if (bothWalletsJustCreated || bothAddressesJustCreated) {
       setIsOpen(true);
     }
     
-    setLastWalletState({ mike: isMikeWalletCreated, mary: isMaryWalletCreated });
-  }, [isMikeWalletCreated, isMaryWalletCreated]);
+    setLastState({
+      mikeWallet: isMikeWalletCreated,
+      maryWallet: isMaryWalletCreated,
+      mikeAddress,
+      maryAddress
+    });
+  }, [isMikeWalletCreated, isMaryWalletCreated, mikeAddress, maryAddress]);
   
   return (
     <>
@@ -60,7 +79,18 @@ export const GuidePopup = ({
               <div className="p-4 border rounded-lg bg-muted/50">
                 <h4 className="font-semibold mb-2">Step 2: Create Wallet Addresses</h4>
                 <p className="text-sm text-muted-foreground">
-                  Bitcoin wallets can have multiple addresses, let's create some addresses in both Mike and Mary wallets so they can transfer the money.
+                  {mikeAddress !== "" && maryAddress !== ""
+                    ? "✅ Great! Both addresses have been created."
+                    : "Bitcoin wallets can have multiple addresses, let's create some addresses in both Mike and Mary wallets so they can transfer the money."}
+                </p>
+              </div>
+            )}
+
+            {mikeAddress !== "" && maryAddress !== "" && (
+              <div className="p-4 border rounded-lg bg-muted/50">
+                <h4 className="font-semibold mb-2">Step 3: Start Mining</h4>
+                <p className="text-sm text-muted-foreground">
+                  Mike needs to mine 101 blocks before he can use his mined funds. This is a special rule in Bitcoin - the miner must wait for 101 blocks to be mined before spending newly mined coins.
                 </p>
               </div>
             )}

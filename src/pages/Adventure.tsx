@@ -92,6 +92,8 @@ const Adventure = () => {
       <GuidePopup 
         isMikeWalletCreated={mikeWallet !== null}
         isMaryWalletCreated={maryWallet !== null}
+        mikeAddress={addresses.mike}
+        maryAddress={addresses.mary}
       />
       {/* Header Section - Add margin-top to account for fixed nav */}
       <div className="max-w-3xl mx-auto text-center mb-12" style={{ marginTop: 'calc(3.5rem + 2rem)' }}>
@@ -158,6 +160,8 @@ const Adventure = () => {
               energyCost={energyCost}
               onBalanceChange={handleBalanceChange}
               onEnergyCostChange={handleEnergyCostChange}
+              mikeAddress={addresses.mike}
+              maryAddress={addresses.mary}
             />
           </div>
         </div>

@@ -4,19 +4,24 @@ import { Progress } from '@/components/ui/progress';
 import { Card } from '@/components/ui/card';
 import { mineBlock } from '@/lib/mining-api';
 import { toast } from '@/components/ui/use-toast';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface MiningSectionProps {
   onBalanceChange: (amount: number) => void;
   balance: number;
   energyCost: number;
   onEnergyCostChange: (amount: number) => void;
+  mikeAddress: string;
+  maryAddress: string;
 }
 
 export const MiningSection = ({
   onBalanceChange,
   balance,
   energyCost,
-  onEnergyCostChange
+  onEnergyCostChange,
+  mikeAddress,
+  maryAddress
 }: MiningSectionProps) => {
   const [isMining, setIsMining] = useState(false);
   const [miningProgress, setMiningProgress] = useState(0);
@@ -84,14 +89,23 @@ export const MiningSection = ({
           </div>
           <Progress value={miningProgress} className="h-2" />
         </div>
-        <Button 
-          onClick={handleMining} 
-          disabled={isMining}
-          className="w-full h-8 text-sm"
-          variant={isMining ? "secondary" : "default"}
-        >
-          {isMining ? "Mining..." : "Start Mining"}
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button 
+              onClick={handleMining} 
+              disabled={isMining || mikeAddress === "" || maryAddress === ""}
+              className="w-full h-8 text-sm"
+              variant={isMining ? "secondary" : "default"}
+            >
+              {isMining ? "Mining..." : "Start Mining"}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            {mikeAddress === "" || maryAddress === "" 
+              ? "Generate both Mike's and Mary's addresses first to start mining"
+              : "Mine 101 blocks to be able to use the mined funds"}
+          </TooltipContent>
+        </Tooltip>
       </div>
     </Card>
   );

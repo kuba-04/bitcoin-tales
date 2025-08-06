@@ -17,7 +17,6 @@ export interface Transaction {
 
 export interface MiningResult {
   success: boolean;
-  reward?: number;
   energyCost: number;
 }
 
@@ -87,19 +86,37 @@ export const createWallet = async (name: string): Promise<{ walletId: string }> 
   return { walletId: data.name };
 };
 
-export const mineBlock = async (): Promise<MiningResult> => {
-  // Simulate mining delay
-  await new Promise(resolve => setTimeout(resolve, 2000));
-  
-  // 30% chance of successful mining
-  const success = Math.random() < 0.3;
-  const energyCost = Math.floor(Math.random() * 3) + 1; // 1-3 energy cost
-  
-  return {
-    success,
-    reward: success ? 10 : 0, // 10 BTC reward for successful mining
-    energyCost
-  };
+export const mineBlock = async (walletName: string, address: string, blocks: number = 101): Promise<MiningResult> => {
+  try {
+    const response = await fetch('http://127.0.0.1:8021/mine', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        wallet_name: walletName,
+        address: address,
+        blocks: blocks
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Mining failed: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    
+    return {
+      success: true,
+      energyCost: blocks // Energy cost scales with blocks mined
+    };
+  } catch (error) {
+    console.error('Mining error:', error);
+    return {
+      success: false,
+      energyCost: blocks // Still consume energy even on failure
+    };
+  }
 };
 
 export const createTransaction = async (
@@ -141,7 +158,28 @@ export const createAddress = async (walletName: string, addressName: string): Pr
   }
 
   const data = await response.json();
-  return { address: data.address };
+  return { address: data };
+};
+
+export const getWalletBalance = async (walletName: string): Promise<number> => {
+  try {
+    const response = await fetch(`http://127.0.0.1:8021/wallet/${walletName}/balance`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to get balance: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Balance check error:', error);
+    throw error;
+  }
 };
 
 export const confirmTransaction = async (

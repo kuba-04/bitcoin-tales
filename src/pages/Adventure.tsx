@@ -37,6 +37,7 @@ const Adventure = () => {
     try {
       setIsLoading(prev => ({ ...prev, [loadingKey]: true }));
       const { address } = await createAddress(walletName, addressName);
+      console.log("Address created:", address);
       setAddresses(prev => ({ ...prev, [type]: address }));
     } catch (error) {
       console.error(`Failed to create address for ${type}:`, error);
@@ -69,7 +70,7 @@ const Adventure = () => {
   };
   
   const handleBalanceChange = (amount: number) => {
-    setBalance(prev => prev + amount);
+    setBalance(amount);
   };
 
   const handleEnergyCostChange = (amount: number) => {
@@ -123,12 +124,12 @@ const Adventure = () => {
                 disabled={isLoading.mike || mikeWallet !== null}
                 className="w-full"
               >
-                {isLoading.mike ? "Creating wallet..." : mikeWallet ? "Wallet created!" : "Create Mike's wallet"}
+                {isLoading.mike ? "Creating wallet..." : mikeWallet ? "✅ Wallet created!" : "Create Mike's wallet"}
               </Button>
               {mikeWallet && (
                 <>
                   <p className="mt-2 text-xs text-muted-foreground break-all">
-                    Wallet address: {mikeWallet}
+                    Wallet ID: {mikeWallet}
                   </p>
                   {mikeWallet && maryWallet && (
                     <>
@@ -140,10 +141,10 @@ const Adventure = () => {
                         {isLoading.mikeAddress 
                           ? "Creating address..." 
                           : addresses.mike 
-                            ? "✅ Mike's address created!" 
+                            ? "✅ Address created!" 
                             : "Create Mike's address"}
                       </Button>
-                      {addresses.mike && (
+                      {addresses.mike !== "" && (
                         <p className="mt-2 text-xs text-muted-foreground break-all">
                           Mike's address: {addresses.mike}
                         </p>
@@ -162,6 +163,7 @@ const Adventure = () => {
               onEnergyCostChange={handleEnergyCostChange}
               mikeAddress={addresses.mike}
               maryAddress={addresses.mary}
+              mikeWallet={mikeWallet}
             />
           </div>
         </div>
@@ -181,12 +183,12 @@ const Adventure = () => {
                 disabled={isLoading.mary || maryWallet !== null}
                 className="w-full"
               >
-                {isLoading.mary ? "Creating wallet..." : maryWallet ? "Wallet created!" : "Create Mary's wallet"}
+                {isLoading.mary ? "Creating wallet..." : maryWallet ? "✅ Wallet created!" : "Create Mary's wallet"}
               </Button>
               {maryWallet && (
                 <>
                   <p className="mt-2 text-xs text-muted-foreground break-all">
-                    Wallet address: {maryWallet}
+                    Wallet ID: {maryWallet}
                   </p>
                   {mikeWallet && maryWallet && (
                     <>
@@ -198,10 +200,10 @@ const Adventure = () => {
                         {isLoading.maryAddress 
                           ? "Creating address..." 
                           : addresses.mary 
-                            ? "✅ Mary's address created!" 
+                            ? "✅ Address created!" 
                             : "Create Mary's address"}
                       </Button>
-                      {addresses.mary && (
+                      {addresses.mary !== "" && (
                         <p className="mt-2 text-xs text-muted-foreground break-all">
                           Mary's address: {addresses.mary}
                         </p>

@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Card } from '@/components/ui/card';
-import { mineBlock } from '@/lib/mining-api';
+import { Input } from '@/components/ui/input';
+import { mineBlock, getWalletBalance } from '@/lib/mining-api';
 import { toast } from '@/components/ui/use-toast';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -13,6 +14,7 @@ interface MiningSectionProps {
   onEnergyCostChange: (amount: number) => void;
   mikeAddress: string;
   maryAddress: string;
+  mikeWallet: string;
 }
 
 export const MiningSection = ({
@@ -21,10 +23,36 @@ export const MiningSection = ({
   energyCost,
   onEnergyCostChange,
   mikeAddress,
-  maryAddress
+  maryAddress,
+  mikeWallet,
 }: MiningSectionProps) => {
   const [isMining, setIsMining] = useState(false);
   const [miningProgress, setMiningProgress] = useState(0);
+  const [blocks, setBlocks] = useState(101);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefreshBalance = async () => {
+    if (!mikeWallet) return;
+    
+    setIsRefreshing(true);
+    try {
+      const newBalance = await getWalletBalance(mikeWallet);
+      onBalanceChange(newBalance);
+      toast({
+        title: "Balance Updated",
+        description: `Current balance: ${newBalance} BTC`,
+      });
+    } catch (error) {
+      console.error('Failed to refresh balance:', error);
+      toast({
+        title: "Error",
+        description: "Failed to refresh balance",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   const handleMining = async () => {
     setIsMining(true);
@@ -36,21 +64,23 @@ export const MiningSection = ({
     }, 200);
 
     try {
-      const result = await mineBlock();
+      const result = await mineBlock(mikeWallet, mikeAddress, blocks);
       setMiningProgress(100);
       
       onEnergyCostChange(result.energyCost);
       
-      if (result.success && result.reward) {
-        onBalanceChange(result.reward);
+      if (result.success) {
+        // Get the new balance after successful mining
+        const newBalance = await getWalletBalance(mikeWallet);
+        onBalanceChange(newBalance);
         toast({
           title: "Mining Successful! 🎉",
-          description: `You earned ${result.reward} BTC but spent ${result.energyCost} energy units.`,
+          description: `Mining completed! Your new balance is ${newBalance} BTC. Energy cost: ${result.energyCost} units.`,
         });
       } else {
         toast({
           title: "Mining Failed",
-          description: `No reward this time. You spent ${result.energyCost} energy units.`,
+          description: `Mining failed. You spent ${result.energyCost} energy units.`,
           variant: "destructive",
         });
       }
@@ -71,9 +101,34 @@ export const MiningSection = ({
 
   return (
     <Card className="p-3">
+      <div className="flex justify-center text-xs">
+        <img src="../assets/mining-machine.png" alt="mining machine" className="h-20 mb-2 mt-2 mx-auto block" />
+      </div>
       <div className="space-y-3">
         <div className="grid grid-cols-2 gap-2 text-sm">
-          <div className="bg-accent/20 p-2 rounded">
+          <div className="bg-accent/20 p-2 rounded relative">
+          <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 absolute top-2  right-20"
+              onClick={handleRefreshBalance}
+              disabled={isRefreshing || !mikeWallet}
+            >
+              <svg
+                className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`}
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                />
+              </svg>
+            </Button>
             <div className="text-xs text-muted-foreground">Balance:</div>
             <div className="font-mono font-medium">{balance.toFixed(2)} BTC</div>
           </div>
@@ -88,6 +143,17 @@ export const MiningSection = ({
             <span>{miningProgress}%</span>
           </div>
           <Progress value={miningProgress} className="h-2" />
+        </div>
+        <div className="flex gap-2 items-center">
+          <Input
+            type="number"
+            min="1"
+            value={blocks}
+            onChange={(e) => setBlocks(Math.max(1, parseInt(e.target.value) || 1))}
+            className="w-24 h-8"
+            disabled={isMining}
+          />
+          <span className="text-xs text-muted-foreground flex-1">blocks to mine</span>
         </div>
         <Tooltip>
           <TooltipTrigger asChild>

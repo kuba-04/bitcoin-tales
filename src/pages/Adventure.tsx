@@ -51,14 +51,14 @@ const Adventure = () => {
       setIsLoading(prev => ({ ...prev, [key]: true }));
       
       const walletName = generateWalletName(type);
-      const { address } = await createWallet(walletName);
+      const { walletId } = await createWallet(walletName);
 
       if (type === WalletType.MINER) {
-        setMikeWallet(address);
-        console.log("Mike's wallet created:", address);
+        setMikeWallet(walletId);
+        console.log("Mike's wallet created:", walletId);
       } else {
-        setMaryWallet(address);
-        console.log("Mary's wallet created:", address);
+        setMaryWallet(walletId);
+        console.log("Mary's wallet created:", walletId);
       }
     } catch (error) {
       console.error(`Failed to create wallet for ${type}:`, error);

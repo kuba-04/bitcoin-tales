@@ -69,7 +69,7 @@ export const MENU_ITEMS: MenuItem[] = [
 ];
 
 // Mock API functions
-export const createWallet = async (name: string): Promise<{ address: string }> => {
+export const createWallet = async (name: string): Promise<{ walletId: string }> => {
   const response = await fetch('http://127.0.0.1:8021/wallet', {
     method: 'POST',
     headers: {
@@ -84,7 +84,7 @@ export const createWallet = async (name: string): Promise<{ address: string }> =
 
   const data = await response.json();
 
-  return { address: data.name };
+  return { walletId: data.name };
 };
 
 export const mineBlock = async (): Promise<MiningResult> => {

@@ -4,15 +4,15 @@ export enum WalletType {
   MERCHANT = "Merchant"
 }
 
-export interface Transaction {
-  id: string;
-  from: string;
-  to: string;
+export interface MempoolTransaction {
+  txid: string;
+  from_wallet: string;
+  to_address: string;
   amount: number;
-  fee: number;
-  change: number;
+  message: string;
   status: 'pending' | 'confirmed';
-  timestamp: number;
+  block_height?: number;
+  confirmations?: number;
 }
 
 export interface MiningResult {
@@ -120,25 +120,31 @@ export const mineBlock = async (walletName: string, address: string, blocks: num
 };
 
 export const createTransaction = async (
+  fromWallet: string,
+  toAddress: string,
   amount: number,
-  itemId: string
-): Promise<Transaction> => {
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  itemName: string
+): Promise<string> => {
+  const response = await fetch('http://127.0.0.1:8021/send', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from_wallet: fromWallet,
+      to_address: toAddress,
+      amount: amount,
+      message: `buying ${itemName}`
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to create transaction: ${response.statusText}`);
+  }
   
-  const fee = 1; // Fixed network fee
-  const change = amount - MENU_ITEMS.find(item => item.id === itemId)!.price - fee;
-  
-  return {
-    id: Math.random().toString(36).substring(7),
-    from: "Mike's Wallet",
-    to: "Mary's Stand",
-    amount,
-    fee,
-    change,
-    status: 'pending',
-    timestamp: Date.now()
-  };
+  const txid = await response.text(); // Parse as text instead of JSON
+  console.log("txid ", txid.replace(/^"|"$/g, ''));
+  return txid.replace(/^"|"$/g, '');
 };
 
 export const createAddress = async (walletName: string, addressName: string): Promise<{ address: string }> => {
@@ -182,14 +188,54 @@ export const getWalletBalance = async (walletName: string): Promise<number> => {
   }
 };
 
-export const confirmTransaction = async (
-  transaction: Transaction
-): Promise<Transaction> => {
-  // Simulate confirmation delay
-  await new Promise(resolve => setTimeout(resolve, 1500));
-  
+export const checkMempoolTransaction = async (
+  txid: string
+): Promise<MempoolTransaction | null> => {
+  const response = await fetch(`http://127.0.0.1:8021/mempool/${txid}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (response.status === 404) {
+    // Transaction is no longer in mempool, likely confirmed
+    return null;
+  }
+
+  if (!response.ok) {
+    throw new Error(`Failed to check transaction status: ${response.statusText}`);
+  }
+
+  const data = await response.json();
   return {
-    ...transaction,
+    ...data,
+    status: data.confirmed ? 'confirmed' : 'pending'
+  };
+};
+
+export const getConfirmedTransaction = async (
+  txid: string
+): Promise<MempoolTransaction> => {
+  console.log('getConfirmedTransaction: Making request to /tx/' + txid);
+  const response = await fetch(`http://127.0.0.1:8021/tx/${txid}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  console.log('getConfirmedTransaction: Response status:', response.status);
+  
+  if (!response.ok) {
+    console.log('getConfirmedTransaction: Request failed with status:', response.statusText);
+    throw new Error(`Failed to get transaction details: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  console.log('getConfirmedTransaction: Response data:', data);
+  return {
+    ...data,
     status: 'confirmed'
   };
 }; 

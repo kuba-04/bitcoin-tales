@@ -1,17 +1,73 @@
-import { MENU_ITEMS, createTransaction } from '@/lib/mining-api';
+import { useState, useEffect } from 'react';
+import { MENU_ITEMS, createTransaction, getWalletBalance } from '@/lib/mining-api';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { toast } from '@/components/ui/use-toast';
-import type { Transaction } from '@/lib/mining-api';
+import type { MempoolTransaction } from '@/lib/mining-api';
+import { BalanceDisplay } from '@/components/BalanceDisplay';
 
 interface MarysStandProps {
   balance: number;
-  onPurchase: (transaction: Transaction) => void;
+  mikeWallet: string | null;
+  maryWallet: string | null;
+  maryAddress: string;
+  onPurchase: (transaction: MempoolTransaction) => void;
+  onBalanceChange: (balance: number) => void;
 }
 
-export const MarysStand = ({ balance, onPurchase }: MarysStandProps) => {
-  const handlePurchase = async (itemId: string, price: number) => {
-    if (balance < price + 1) { // +1 for network fee
+export const MarysStand = ({ balance, mikeWallet, maryWallet, maryAddress, onPurchase, onBalanceChange }: MarysStandProps) => {
+  const [maryBalance, setMaryBalance] = useState(0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  useEffect(() => {
+    if (maryWallet) {
+      handleRefreshBalance();
+    }
+  }, [maryWallet]);
+
+  const handleRefreshBalance = async () => {
+    if (!maryWallet) return;
+    
+    setIsRefreshing(true);
+    try {
+      const newBalance = await getWalletBalance(maryWallet);
+      setMaryBalance(newBalance);
+      onBalanceChange(newBalance);
+      toast({
+        title: "Balance Updated",
+        description: `Mary's balance: ${newBalance} BTC`,
+      });
+    } catch (error) {
+      console.error('Failed to refresh balance:', error);
+      toast({
+        title: "Error",
+        description: "Failed to refresh Mary's balance",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+  const handlePurchase = async (itemId: string, price: number, itemName: string) => {
+    if (!mikeWallet) {
+      toast({
+        title: "Wallet Not Ready",
+        description: "Please create Mike's wallet first!",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!maryAddress) {
+      toast({
+        title: "Address Not Ready",
+        description: "Please create Mary's address first!",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (balance < price) {
       toast({
         title: "Insufficient Balance",
         description: "You need more BTC to make this purchase. Try mining more!",
@@ -21,8 +77,16 @@ export const MarysStand = ({ balance, onPurchase }: MarysStandProps) => {
     }
 
     try {
-      const transaction = await createTransaction(balance, itemId);
-      onPurchase(transaction);
+      const txid = await createTransaction(mikeWallet, maryAddress, price, itemName);
+      // Pass the txid to parent component
+      onPurchase({
+        txid,
+        from_wallet: mikeWallet,
+        to_address: maryAddress,
+        amount: price,
+        message: `buying ${itemName}`,
+        status: 'pending'
+      });
     } catch (error) {
       toast({
         title: "Error",
@@ -35,6 +99,12 @@ export const MarysStand = ({ balance, onPurchase }: MarysStandProps) => {
   return (
     <Card className="p-3">
       <div className="space-y-3">
+        <BalanceDisplay
+          balance={maryBalance}
+          onRefresh={handleRefreshBalance}
+          isRefreshing={isRefreshing}
+          showRefresh={maryWallet !== null}
+        />
         {MENU_ITEMS.map((item) => (
           <div
             key={item.id}
@@ -50,7 +120,7 @@ export const MarysStand = ({ balance, onPurchase }: MarysStandProps) => {
             <div className="text-right flex flex-col items-end gap-1 ml-2">
               <div className="text-xs font-mono">{item.price} BTC</div>
               <Button
-                onClick={() => handlePurchase(item.id, item.price)}
+                onClick={() => handlePurchase(item.id, item.price, item.name)}
                 disabled={balance < item.price + 1}
                 size="sm"
                 variant="secondary"

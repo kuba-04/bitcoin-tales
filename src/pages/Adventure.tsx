@@ -2,15 +2,21 @@ import { useState } from 'react';
 import { MiningSection } from "@/components/MiningSection";
 import { MarysStand } from "@/components/MarysStand";
 import { MempoolViewer } from "@/components/MempoolViewer";
-import type { Transaction } from "@/lib/mining-api";
-import { createWallet, createAddress, WalletType } from "@/lib/mining-api";
+import { TransactionViewer } from "@/components/TransactionViewer";
+import type { MempoolTransaction } from "@/lib/mining-api";
+import { createWallet, createAddress, getWalletBalance, WalletType } from "@/lib/mining-api";
 import { Button } from "@/components/ui/button";
 import { GuidePopup } from "@/components/GuidePopup";
+import { MiningGuidanceAlert } from "@/components/MiningGuidanceAlert";
 
 const Adventure = () => {
   const [balance, setBalance] = useState(0);
+  const [maryBalance, setMaryBalance] = useState(0);
   const [energyCost, setEnergyCost] = useState(0);
-  const [pendingTransaction, setPendingTransaction] = useState<Transaction | null>(null);
+  const [pendingTransaction, setPendingTransaction] = useState<MempoolTransaction | null>(null);
+  const [showMempoolViewer, setShowMempoolViewer] = useState(false);
+  const [showTransactionViewer, setShowTransactionViewer] = useState(false);
+  const [showMiningGuidance, setShowMiningGuidance] = useState(false);
   const [mikeWallet, setMikeWallet] = useState<string | null>(null);
   const [maryWallet, setMaryWallet] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<{ mike: boolean; mary: boolean; mikeAddress: boolean; maryAddress: boolean }>({ 
@@ -77,14 +83,25 @@ const Adventure = () => {
     setEnergyCost(prev => prev + amount);
   };
 
-  const handlePurchase = (transaction: Transaction) => {
+  const handlePurchase = (transaction: MempoolTransaction) => {
     setPendingTransaction(transaction);
+    setShowMiningGuidance(true); // Show guidance immediately after purchase
   };
 
-  const handleTransactionConfirmed = (transaction: Transaction) => {
-    // Update balance after transaction is confirmed
-    setBalance(transaction.change);
+  const handleTransactionConfirmed = async (transaction: MempoolTransaction) => {
+    // Update Mike's balance after transaction is confirmed
+    setBalance(prev => prev - transaction.amount); // Deduct the spent amount
     setPendingTransaction(null);
+
+    // Refresh Mary's balance after transaction is confirmed
+    if (maryWallet) {
+      try {
+        const newBalance = await getWalletBalance(maryWallet);
+        setMaryBalance(newBalance);
+      } catch (error) {
+        console.error('Failed to refresh Mary\'s balance:', error);
+      }
+    }
   };
 
   return (
@@ -164,6 +181,9 @@ const Adventure = () => {
               mikeAddress={addresses.mike}
               maryAddress={addresses.mary}
               mikeWallet={mikeWallet}
+              onViewMempool={() => setShowMempoolViewer(true)}
+              onViewTransaction={() => setShowTransactionViewer(true)}
+              hasPendingTransaction={pendingTransaction !== null}
             />
           </div>
         </div>
@@ -217,7 +237,11 @@ const Adventure = () => {
           <div className="p-6">
             <MarysStand
               balance={balance}
+              mikeWallet={mikeWallet}
+              maryWallet={maryWallet}
+              maryAddress={addresses.mary}
               onPurchase={handlePurchase}
+              onBalanceChange={setMaryBalance}
             />
           </div>
         </div>
@@ -225,8 +249,22 @@ const Adventure = () => {
 
       {/* Mempool Viewer - Modal */}
       <MempoolViewer
-        transaction={pendingTransaction}
+        transaction={showMempoolViewer ? pendingTransaction : null}
         onTransactionConfirmed={handleTransactionConfirmed}
+        onClose={() => setShowMempoolViewer(false)}
+      />
+
+      {/* Transaction Viewer - Modal */}
+      <TransactionViewer
+        transaction={showTransactionViewer ? pendingTransaction : null}
+        onClose={() => setShowTransactionViewer(false)}
+      />
+
+      {/* Mining Guidance Alert */}
+      <MiningGuidanceAlert
+        open={showMiningGuidance}
+        onOpenChange={setShowMiningGuidance}
+        onViewMempool={() => setShowMempoolViewer(true)}
       />
 
       {/* Success Message - Small overlay */}

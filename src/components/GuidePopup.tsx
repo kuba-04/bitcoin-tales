@@ -62,9 +62,6 @@ export const GuidePopup = ({
       {/* Guide Dialog */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Let's practice the basics!</DialogTitle>
-          </DialogHeader>
           <div className="space-y-4">
             <div className="p-4 border rounded-lg bg-muted/50">
               <h4 className="font-semibold mb-2">Step 1: Create Wallets for Mike and Mary</h4>

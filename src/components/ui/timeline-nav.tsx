@@ -1,9 +1,21 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from './button';
-import { ChevronLeft, ChevronRight, Bitcoin } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Bitcoin, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useDisplayStore } from '@/lib/utils';
 import { Switch } from './switch';
+import { storage } from '@/lib/storage';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const pages = ['/', '/mining', '/merchant', '/exchange', '/treasure'];
 const pageNames = ['Introduction', 'Mining', 'Merchant', 'Exchange', 'Treasure'];
@@ -79,6 +91,38 @@ export function TimelineNav() {
                 {displayInBTC ? 'BTC' : 'sats'}
               </span>
             </div>
+
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="shrink-0 h-8 px-2 flex items-center gap-1 text-destructive hover:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  <span className="text-xs">Reset</span>
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will reset all your data including wallets, addresses, balances, and transaction history.
+                    This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => {
+                    storage.clearAll();
+                    window.location.reload();
+                  }}>
+                    Reset Data
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+
             <Button
               variant="ghost"
               size="sm"

@@ -7,6 +7,7 @@ import { toast } from '@/components/ui/use-toast';
 import type { MempoolTransaction } from '@/lib/mining-api';
 import { BalanceDisplay } from '@/components/BalanceDisplay';
 import { Input } from '@/components/ui/input';
+import { storage } from '@/lib/storage';
 
 interface MarysStandProps {
   balance: number;
@@ -22,10 +23,15 @@ export const MarysStand = ({ balance, mikeWallet, maryWallet, maryAddress, onPur
   const [isRefreshing, setIsRefreshing] = useState(false);
   const displayInBTC = useDisplayStore((state) => state.displayInBTC);
   const [prices, setPrices] = useState<{ [key: string]: number }>(() => {
+    const storedPrices = storage.getMenuPrices();
+    if (Object.keys(storedPrices).length > 0) {
+      return storedPrices;
+    }
     const initialPrices: { [key: string]: number } = {};
     MENU_ITEMS.forEach(item => {
       initialPrices[item.id] = item.price;
     });
+    storage.setMenuPrices(initialPrices);
     return initialPrices;
   });
 
@@ -58,10 +64,12 @@ export const MarysStand = ({ balance, mikeWallet, maryWallet, maryAddress, onPur
     if (!isNaN(price) && price > 0) {
       // If in BTC mode, convert to sats for storage
       const priceInSats = displayInBTC ? Math.floor(price * 100_000_000) : price;
-      setPrices(prev => ({
-        ...prev,
+      const newPrices = {
+        ...prices,
         [itemId]: priceInSats
-      }));
+      };
+      setPrices(newPrices);
+      storage.setMenuPrices(newPrices);
     }
   };
 

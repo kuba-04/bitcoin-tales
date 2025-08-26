@@ -189,9 +189,11 @@ export const getWalletBalance = async (walletName: string): Promise<number> => {
 };
 
 export const checkMempoolTransaction = async (
+  walletName: string,
   txid: string
 ): Promise<MempoolTransaction | null> => {
-  const response = await fetch(`http://127.0.0.1:8021/mempool/${txid}`, {
+  console.log('checkMempoolTransaction: Making request to /mempool/' + walletName + '/' + txid);
+  const response = await fetch(`http://127.0.0.1:8021/mempool/${walletName}/${txid}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -215,10 +217,11 @@ export const checkMempoolTransaction = async (
 };
 
 export const getConfirmedTransaction = async (
+  walletName: string,
   txid: string
 ): Promise<MempoolTransaction> => {
   console.log('getConfirmedTransaction: Making request to /tx/' + txid);
-  const response = await fetch(`http://127.0.0.1:8021/tx/${txid}`, {
+  const response = await fetch(`http://127.0.0.1:8021/tx/${walletName}/${txid}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',

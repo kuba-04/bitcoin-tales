@@ -7,7 +7,7 @@ import type { MempoolTransaction } from "@/lib/mining-api";
 import { createWallet, createAddress, getWalletBalance, WalletType } from "@/lib/mining-api";
 import { Button } from "@/components/ui/button";
 import { GuidePopup } from "@/components/GuidePopup";
-import { MiningGuidanceAlert } from "@/components/MiningGuidanceAlert";
+
 
 const Adventure = () => {
   const [balance, setBalance] = useState(0);
@@ -16,7 +16,7 @@ const Adventure = () => {
   const [pendingTransaction, setPendingTransaction] = useState<MempoolTransaction | null>(null);
   const [showMempoolViewer, setShowMempoolViewer] = useState(false);
   const [showTransactionViewer, setShowTransactionViewer] = useState(false);
-  const [showMiningGuidance, setShowMiningGuidance] = useState(false);
+
   const [mikeWallet, setMikeWallet] = useState<string | null>(null);
   const [maryWallet, setMaryWallet] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<{ mike: boolean; mary: boolean; mikeAddress: boolean; maryAddress: boolean }>({ 
@@ -85,24 +85,9 @@ const Adventure = () => {
 
   const handlePurchase = (transaction: MempoolTransaction) => {
     setPendingTransaction(transaction);
-    setShowMiningGuidance(true); // Show guidance immediately after purchase
   };
 
-  const handleTransactionConfirmed = async (transaction: MempoolTransaction) => {
-    // Update Mike's balance after transaction is confirmed
-    setBalance(prev => prev - transaction.amount); // Deduct the spent amount
-    setPendingTransaction(null);
 
-    // Refresh Mary's balance after transaction is confirmed
-    if (maryWallet) {
-      try {
-        const newBalance = await getWalletBalance(maryWallet);
-        setMaryBalance(newBalance);
-      } catch (error) {
-        console.error('Failed to refresh Mary\'s balance:', error);
-      }
-    }
-  };
 
   return (
     <div className="container mx-auto px-4 min-h-screen">
@@ -249,23 +234,19 @@ const Adventure = () => {
 
       {/* Mempool Viewer - Modal */}
       <MempoolViewer
-        transaction={showMempoolViewer ? pendingTransaction : null}
-        onTransactionConfirmed={handleTransactionConfirmed}
+        walletName={mikeWallet || ''}
+        txid={showMempoolViewer ? pendingTransaction?.txid || null : null}
         onClose={() => setShowMempoolViewer(false)}
       />
 
       {/* Transaction Viewer - Modal */}
       <TransactionViewer
-        transaction={showTransactionViewer ? pendingTransaction : null}
+        walletName={mikeWallet || ''}
+        txid={showTransactionViewer ? pendingTransaction?.txid || null : null}
         onClose={() => setShowTransactionViewer(false)}
       />
 
-      {/* Mining Guidance Alert */}
-      <MiningGuidanceAlert
-        open={showMiningGuidance}
-        onOpenChange={setShowMiningGuidance}
-        onViewMempool={() => setShowMempoolViewer(true)}
-      />
+
 
       {/* Success Message - Small overlay */}
       {pendingTransaction?.status === 'confirmed' && (

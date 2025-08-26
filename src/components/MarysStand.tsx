@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { toast } from '@/components/ui/use-toast';
 import type { MempoolTransaction } from '@/lib/mining-api';
 import { BalanceDisplay } from '@/components/BalanceDisplay';
+import { Input } from '@/components/ui/input';
 
 interface MarysStandProps {
   balance: number;
@@ -13,11 +14,18 @@ interface MarysStandProps {
   maryAddress: string;
   onPurchase: (transaction: MempoolTransaction) => void;
   onBalanceChange: (balance: number) => void;
+  maryBalance?: number;
 }
 
-export const MarysStand = ({ balance, mikeWallet, maryWallet, maryAddress, onPurchase, onBalanceChange }: MarysStandProps) => {
-  const [maryBalance, setMaryBalance] = useState(0);
+export const MarysStand = ({ balance, mikeWallet, maryWallet, maryAddress, onPurchase, onBalanceChange, maryBalance = 0 }: MarysStandProps) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [prices, setPrices] = useState<{ [key: string]: number }>(() => {
+    const initialPrices: { [key: string]: number } = {};
+    MENU_ITEMS.forEach(item => {
+      initialPrices[item.id] = item.price;
+    });
+    return initialPrices;
+  });
 
   useEffect(() => {
     if (maryWallet) {
@@ -31,12 +39,7 @@ export const MarysStand = ({ balance, mikeWallet, maryWallet, maryAddress, onPur
     setIsRefreshing(true);
     try {
       const newBalance = await getWalletBalance(maryWallet);
-      setMaryBalance(newBalance);
       onBalanceChange(newBalance);
-      toast({
-        title: "Balance Updated",
-        description: `Mary's balance: ${newBalance} BTC`,
-      });
     } catch (error) {
       console.error('Failed to refresh balance:', error);
       toast({
@@ -48,6 +51,16 @@ export const MarysStand = ({ balance, mikeWallet, maryWallet, maryAddress, onPur
       setIsRefreshing(false);
     }
   };
+  const handlePriceChange = (itemId: string, newPrice: string) => {
+    const price = parseFloat(newPrice);
+    if (!isNaN(price) && price > 0) {
+      setPrices(prev => ({
+        ...prev,
+        [itemId]: price
+      }));
+    }
+  };
+
   const handlePurchase = async (itemId: string, price: number, itemName: string) => {
     if (!mikeWallet) {
       toast({
@@ -103,7 +116,7 @@ export const MarysStand = ({ balance, mikeWallet, maryWallet, maryAddress, onPur
           balance={maryBalance}
           onRefresh={handleRefreshBalance}
           isRefreshing={isRefreshing}
-          showRefresh={maryWallet !== null}
+          showRefresh={false}
         />
         {MENU_ITEMS.map((item) => (
           <div
@@ -117,18 +130,29 @@ export const MarysStand = ({ balance, mikeWallet, maryWallet, maryAddress, onPur
                 <p className="text-xs text-muted-foreground truncate">{item.description}</p>
               </div>
             </div>
-            <div className="text-right flex flex-col items-end gap-1 ml-2">
-              <div className="text-xs font-mono">{item.price} BTC</div>
-              <Button
-                onClick={() => handlePurchase(item.id, item.price, item.name)}
-                disabled={balance < item.price + 1}
-                size="sm"
-                variant="secondary"
-                className="h-6 text-xs px-2"
-              >
-                Buy
-              </Button>
-            </div>
+                          <div className="text-right flex flex-col items-end gap-1 ml-2">
+                <div className="flex items-center gap-1">
+                  <Input
+                    type="number"
+                    min="0.000000001"
+                    step="0.000000001"
+                    placeholder="0.000000001"
+                    value={prices[item.id]}
+                    onChange={(e) => handlePriceChange(item.id, e.target.value)}
+                    className="w-20 h-6 text-xs px-2"
+                  />
+                  <span className="text-xs font-mono">sats</span>
+                </div>
+                <Button
+                  onClick={() => handlePurchase(item.id, prices[item.id], item.name)}
+                  disabled={balance < prices[item.id] + 1}
+                  size="sm"
+                  variant="secondary"
+                  className="h-6 text-xs px-2"
+                >
+                  Buy
+                </Button>
+              </div>
           </div>
         ))}
       </div>

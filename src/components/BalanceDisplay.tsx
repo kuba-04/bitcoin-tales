@@ -40,7 +40,7 @@ export const BalanceDisplay = ({
         </Button>
       )}
       <div className="text-xs text-muted-foreground">Balance:</div>
-      <div className="font-mono font-medium">{balance.toFixed(2)} BTC</div>
+      <div className="font-mono font-medium">{balance} sats</div>
     </div>
   );
 };

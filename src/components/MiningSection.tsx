@@ -9,29 +9,32 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { BalanceDisplay } from '@/components/BalanceDisplay';
 
 interface MiningSectionProps {
-  onBalanceChange: (amount: number) => void;
-  balance: number;
+  onMikeBalanceChange: (amount: number) => void;
+  onMaryBalanceChange: (amount: number) => void;
+  mikeBalance: number;
   energyCost: number;
   onEnergyCostChange: (amount: number) => void;
   mikeAddress: string;
   maryAddress: string;
   mikeWallet: string;
+  maryWallet: string;
   onViewMempool: () => void;
   onViewTransaction: () => void;
   hasPendingTransaction: boolean;
 }
 
 export const MiningSection = ({
-  onBalanceChange,
-  balance,
+  onMikeBalanceChange,
+  onMaryBalanceChange,
+  mikeBalance,
   energyCost,
   onEnergyCostChange,
   mikeAddress,
   maryAddress,
   mikeWallet,
+  maryWallet,
   onViewMempool,
   onViewTransaction,
-  hasPendingTransaction,
 }: MiningSectionProps) => {
   const [isMining, setIsMining] = useState(false);
   const [miningProgress, setMiningProgress] = useState(0);
@@ -44,11 +47,7 @@ export const MiningSection = ({
     setIsRefreshing(true);
     try {
       const newBalance = await getWalletBalance(mikeWallet);
-      onBalanceChange(newBalance);
-      toast({
-        title: "Balance Updated",
-        description: `Current balance: ${newBalance} BTC`,
-      });
+      onMikeBalanceChange(newBalance);
     } catch (error) {
       console.error('Failed to refresh balance:', error);
       toast({
@@ -78,12 +77,14 @@ export const MiningSection = ({
       
       if (result.success) {
         // Get the new balance after successful mining
-        const newBalance = await getWalletBalance(mikeWallet);
-        onBalanceChange(newBalance);
-        toast({
-          title: "Mining Successful! 🎉",
-          description: `Mining completed! Your new balance is ${newBalance} BTC. Energy cost: ${result.energyCost} units.`,
-        });
+        const newMikesBalance = await getWalletBalance(mikeWallet);
+        const newMarysBalance = await getWalletBalance(maryWallet);
+        onMikeBalanceChange(newMikesBalance);
+        onMaryBalanceChange(newMarysBalance);
+        // toast({
+        //   title: "Mining Successful! 🎉",
+        //   description: `Mining completed! Your new balance is ${newMikesBalance} BTC. Energy cost: ${result.energyCost} units.`,
+        // });
       } else {
         toast({
           title: "Mining Failed",
@@ -114,7 +115,7 @@ export const MiningSection = ({
       <div className="space-y-3">
         <div className="grid grid-cols-2 gap-2 text-sm">
           <BalanceDisplay
-            balance={balance}
+            balance={mikeBalance}
             onRefresh={handleRefreshBalance}
             isRefreshing={isRefreshing}
             showRefresh={true}

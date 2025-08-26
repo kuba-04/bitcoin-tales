@@ -10,7 +10,7 @@ import { GuidePopup } from "@/components/GuidePopup";
 
 
 const Adventure = () => {
-  const [balance, setBalance] = useState(0);
+  const [mikeBalance, setMikeBalance] = useState(0);
   const [maryBalance, setMaryBalance] = useState(0);
   const [energyCost, setEnergyCost] = useState(0);
   const [pendingTransaction, setPendingTransaction] = useState<MempoolTransaction | null>(null);
@@ -75,8 +75,12 @@ const Adventure = () => {
     }
   };
   
-  const handleBalanceChange = (amount: number) => {
-    setBalance(amount);
+  const handleMikeBalanceChange = (amount: number) => {
+    setMikeBalance(amount);
+  };
+  
+  const handleMaryBalanceChange = (amount: number) => {
+    setMaryBalance(amount);
   };
 
   const handleEnergyCostChange = (amount: number) => {
@@ -159,13 +163,15 @@ const Adventure = () => {
           </div>
           <div className="p-6">
             <MiningSection
-              balance={balance}
+              mikeBalance={mikeBalance}
               energyCost={energyCost}
-              onBalanceChange={handleBalanceChange}
+              onMikeBalanceChange={handleMikeBalanceChange}
+              onMaryBalanceChange={handleMaryBalanceChange}
               onEnergyCostChange={handleEnergyCostChange}
               mikeAddress={addresses.mike}
               maryAddress={addresses.mary}
               mikeWallet={mikeWallet}
+              maryWallet={maryWallet}
               onViewMempool={() => setShowMempoolViewer(true)}
               onViewTransaction={() => setShowTransactionViewer(true)}
               hasPendingTransaction={pendingTransaction !== null}
@@ -221,12 +227,13 @@ const Adventure = () => {
           </div>
           <div className="p-6">
             <MarysStand
-              balance={balance}
+              balance={mikeBalance}
               mikeWallet={mikeWallet}
               maryWallet={maryWallet}
               maryAddress={addresses.mary}
               onPurchase={handlePurchase}
               onBalanceChange={setMaryBalance}
+              maryBalance={maryBalance}
             />
           </div>
         </div>

@@ -96,6 +96,10 @@ export const MarysStand = ({ balance, mikeWallet, maryWallet, maryAddress, onPur
     try {
       const txid = await createTransaction(mikeWallet, maryAddress, price, itemName);
       // Pass the txid to parent component
+      toast({
+        title: "Transaction Created",
+        description: `Transaction created! ${txid}`,
+      });
       onPurchase({
         txid,
         from_wallet: mikeWallet,

@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { useDisplayStore, satoshisToBTC, formatBTCValue } from '@/lib/utils';
 
 interface BalanceDisplayProps {
   balance: number;
@@ -13,6 +14,12 @@ export const BalanceDisplay = ({
   isRefreshing = false,
   showRefresh = false,
 }: BalanceDisplayProps) => {
+  const displayInBTC = useDisplayStore((state) => state.displayInBTC);
+
+  const displayValue = displayInBTC 
+    ? `${formatBTCValue(satoshisToBTC(balance))} BTC`
+    : `${balance} sats`;
+
   return (
     <div className="bg-accent/20 p-2 rounded relative">
       {showRefresh && onRefresh && (
@@ -40,7 +47,7 @@ export const BalanceDisplay = ({
         </Button>
       )}
       <div className="text-xs text-muted-foreground">Balance:</div>
-      <div className="font-mono font-medium">{balance} sats</div>
+      <div className="font-mono font-medium">{displayValue}</div>
     </div>
   );
 };

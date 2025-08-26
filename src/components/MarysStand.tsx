@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { MENU_ITEMS, createTransaction, getWalletBalance } from '@/lib/mining-api';
 import { Button } from '@/components/ui/button';
+import { useDisplayStore, satoshisToBTC, formatBTCValue } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
 import { toast } from '@/components/ui/use-toast';
 import type { MempoolTransaction } from '@/lib/mining-api';
@@ -19,6 +20,7 @@ interface MarysStandProps {
 
 export const MarysStand = ({ balance, mikeWallet, maryWallet, maryAddress, onPurchase, onBalanceChange, maryBalance = 0 }: MarysStandProps) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const displayInBTC = useDisplayStore((state) => state.displayInBTC);
   const [prices, setPrices] = useState<{ [key: string]: number }>(() => {
     const initialPrices: { [key: string]: number } = {};
     MENU_ITEMS.forEach(item => {
@@ -54,9 +56,11 @@ export const MarysStand = ({ balance, mikeWallet, maryWallet, maryAddress, onPur
   const handlePriceChange = (itemId: string, newPrice: string) => {
     const price = parseFloat(newPrice);
     if (!isNaN(price) && price > 0) {
+      // If in BTC mode, convert to sats for storage
+      const priceInSats = displayInBTC ? Math.floor(price * 100_000_000) : price;
       setPrices(prev => ({
         ...prev,
-        [itemId]: price
+        [itemId]: priceInSats
       }));
     }
   };
@@ -134,14 +138,16 @@ export const MarysStand = ({ balance, mikeWallet, maryWallet, maryAddress, onPur
                 <div className="flex items-center gap-1">
                   <Input
                     type="number"
-                    min="0.000000001"
-                    step="0.000000001"
-                    placeholder="0.000000001"
-                    value={prices[item.id]}
+                    min={displayInBTC ? "0.00000001" : "1"}
+                    step={displayInBTC ? "0.00000001" : "1"}
+                    placeholder={displayInBTC ? "0.00000001" : "1"}
+                    value={displayInBTC ? formatBTCValue(satoshisToBTC(prices[item.id])) : prices[item.id]}
                     onChange={(e) => handlePriceChange(item.id, e.target.value)}
-                    className="w-20 h-6 text-xs px-2"
+                    className="w-21 h-6 text-xs px-2"
                   />
-                  <span className="text-xs font-mono">sats</span>
+                  <span className="text-xs font-mono">
+                    {displayInBTC ? 'BTC' : 'sats'}
+                  </span>
                 </div>
                 <Button
                   onClick={() => handlePurchase(item.id, prices[item.id], item.name)}

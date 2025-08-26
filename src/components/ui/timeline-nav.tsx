@@ -1,7 +1,9 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from './button';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Bitcoin } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useDisplayStore } from '@/lib/utils';
+import { Switch } from './switch';
 
 const pages = ['/', '/mining', '/merchant', '/exchange', '/treasure'];
 const pageNames = ['Introduction', 'Mining', 'Merchant', 'Exchange', 'Treasure'];
@@ -10,6 +12,7 @@ export function TimelineNav() {
   const location = useLocation();
   const navigate = useNavigate();
   const currentPageIndex = pages.indexOf(location.pathname);
+  const { displayInBTC, toggleDisplay } = useDisplayStore();
 
   const goToNextPage = () => {
     if (currentPageIndex < pages.length - 1) {
@@ -64,15 +67,28 @@ export function TimelineNav() {
             </div>
           </div>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={goToNextPage}
-            disabled={currentPageIndex === pages.length - 1}
-            className="shrink-0 h-8 w-8 p-0"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 mr-2">
+              <Bitcoin className="h-4 w-4" />
+              <Switch
+                checked={displayInBTC}
+                onCheckedChange={toggleDisplay}
+                className="data-[state=checked]:bg-orange-500"
+              />
+              <span className="text-xs font-medium">
+                {displayInBTC ? 'BTC' : 'sats'}
+              </span>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={goToNextPage}
+              disabled={currentPageIndex === pages.length - 1}
+              className="shrink-0 h-8 w-8 p-0"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </div>
     </nav>

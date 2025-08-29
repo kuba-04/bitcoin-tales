@@ -6,25 +6,35 @@ import { Input } from '@/components/ui/input';
 import { mineBlock, getWalletBalance } from '@/lib/mining-api';
 import { toast } from '@/components/ui/use-toast';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { BalanceDisplay } from '@/components/BalanceDisplay';
 
 interface MiningSectionProps {
-  onBalanceChange: (amount: number) => void;
-  balance: number;
+  onMikeBalanceChange: (amount: number) => void;
+  onMaryBalanceChange: (amount: number) => void;
+  mikeBalance: number;
   energyCost: number;
   onEnergyCostChange: (amount: number) => void;
   mikeAddress: string;
   maryAddress: string;
   mikeWallet: string;
+  maryWallet: string;
+  onViewMempool: () => void;
+  onViewTransaction: () => void;
+  hasPendingTransaction: boolean;
 }
 
 export const MiningSection = ({
-  onBalanceChange,
-  balance,
+  onMikeBalanceChange,
+  onMaryBalanceChange,
+  mikeBalance,
   energyCost,
   onEnergyCostChange,
   mikeAddress,
   maryAddress,
   mikeWallet,
+  maryWallet,
+  onViewMempool,
+  onViewTransaction,
 }: MiningSectionProps) => {
   const [isMining, setIsMining] = useState(false);
   const [miningProgress, setMiningProgress] = useState(0);
@@ -37,11 +47,7 @@ export const MiningSection = ({
     setIsRefreshing(true);
     try {
       const newBalance = await getWalletBalance(mikeWallet);
-      onBalanceChange(newBalance);
-      toast({
-        title: "Balance Updated",
-        description: `Current balance: ${newBalance} BTC`,
-      });
+      onMikeBalanceChange(newBalance);
     } catch (error) {
       console.error('Failed to refresh balance:', error);
       toast({
@@ -71,12 +77,14 @@ export const MiningSection = ({
       
       if (result.success) {
         // Get the new balance after successful mining
-        const newBalance = await getWalletBalance(mikeWallet);
-        onBalanceChange(newBalance);
-        toast({
-          title: "Mining Successful! 🎉",
-          description: `Mining completed! Your new balance is ${newBalance} BTC. Energy cost: ${result.energyCost} units.`,
-        });
+        const newMikesBalance = await getWalletBalance(mikeWallet);
+        const newMarysBalance = await getWalletBalance(maryWallet);
+        onMikeBalanceChange(newMikesBalance);
+        onMaryBalanceChange(newMarysBalance);
+        // toast({
+        //   title: "Mining Successful! 🎉",
+        //   description: `Mining completed! Your new balance is ${newMikesBalance} BTC. Energy cost: ${result.energyCost} units.`,
+        // });
       } else {
         toast({
           title: "Mining Failed",
@@ -106,32 +114,12 @@ export const MiningSection = ({
       </div>
       <div className="space-y-3">
         <div className="grid grid-cols-2 gap-2 text-sm">
-          <div className="bg-accent/20 p-2 rounded relative">
-          <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6 absolute top-2  right-20"
-              onClick={handleRefreshBalance}
-              disabled={isRefreshing || !mikeWallet}
-            >
-              <svg
-                className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`}
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                />
-              </svg>
-            </Button>
-            <div className="text-xs text-muted-foreground">Balance:</div>
-            <div className="font-mono font-medium">{balance.toFixed(2)} BTC</div>
-          </div>
+          <BalanceDisplay
+            balance={mikeBalance}
+            onRefresh={handleRefreshBalance}
+            isRefreshing={isRefreshing}
+            showRefresh={true}
+          />
           <div className="bg-accent/20 p-2 rounded">
             <div className="text-xs text-muted-foreground">Energy Cost:</div>
             <div className="font-mono font-medium text-red-500">{energyCost} units</div>
@@ -155,23 +143,41 @@ export const MiningSection = ({
           />
           <span className="text-xs text-muted-foreground flex-1">blocks to mine</span>
         </div>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button 
-              onClick={handleMining} 
-              disabled={isMining || mikeAddress === "" || maryAddress === ""}
-              className="w-full h-8 text-sm"
-              variant={isMining ? "secondary" : "default"}
-            >
-              {isMining ? "Mining..." : "Start Mining"}
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            {mikeAddress === "" || maryAddress === "" 
-              ? "Generate both Mike's and Mary's addresses first to start mining"
-              : "Mine 101 blocks to be able to use the mined funds"}
-          </TooltipContent>
-        </Tooltip>
+        <div className="space-y-2">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                onClick={handleMining} 
+                disabled={isMining || mikeAddress === "" || maryAddress === ""}
+                className="w-full h-8 text-sm"
+                variant={isMining ? "secondary" : "default"}
+              >
+                {isMining ? "Mining..." : "Start Mining"}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              {mikeAddress === "" || maryAddress === "" 
+                ? "Generate both Mike's and Mary's addresses first to start mining"
+                : "Mine 101 blocks to be able to use the mined funds"}
+            </TooltipContent>
+          </Tooltip>
+
+          <Button 
+            onClick={onViewMempool}
+            variant="outline"
+            className="w-full h-8 text-sm"
+          >
+            View Mempool
+          </Button>
+
+          <Button 
+            onClick={onViewTransaction}
+            variant="outline"
+            className="w-full h-8 text-sm"
+          >
+            View Transaction
+          </Button>
+        </div>
       </div>
     </Card>
   );

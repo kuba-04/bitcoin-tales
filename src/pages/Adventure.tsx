@@ -1,25 +1,46 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MiningSection } from "@/components/MiningSection";
 import { MarysStand } from "@/components/MarysStand";
 import { MempoolViewer } from "@/components/MempoolViewer";
-import type { Transaction } from "@/lib/mining-api";
-import { createWallet, createAddress, WalletType } from "@/lib/mining-api";
+import { TransactionViewer } from "@/components/TransactionViewer";
+import type { MempoolTransaction } from "@/lib/mining-api";
+import { createWallet, createAddress, getWalletBalance, WalletType } from "@/lib/mining-api";
 import { Button } from "@/components/ui/button";
 import { GuidePopup } from "@/components/GuidePopup";
+import { storage } from "@/lib/storage";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+
 
 const Adventure = () => {
-  const [balance, setBalance] = useState(0);
+  const [mikeBalance, setMikeBalance] = useState(() => storage.getMikeBalance());
+  const [maryBalance, setMaryBalance] = useState(() => storage.getMaryBalance());
   const [energyCost, setEnergyCost] = useState(0);
-  const [pendingTransaction, setPendingTransaction] = useState<Transaction | null>(null);
-  const [mikeWallet, setMikeWallet] = useState<string | null>(null);
-  const [maryWallet, setMaryWallet] = useState<string | null>(null);
+  const [pendingTransaction, setPendingTransaction] = useState<MempoolTransaction | null>(null);
+  const [showMempoolViewer, setShowMempoolViewer] = useState(false);
+  const [showTransactionViewer, setShowTransactionViewer] = useState(false);
+
+  const [mikeWallet, setMikeWallet] = useState<string | null>(() => storage.getMikeWallet());
+  const [maryWallet, setMaryWallet] = useState<string | null>(() => storage.getMaryWallet());
   const [isLoading, setIsLoading] = useState<{ mike: boolean; mary: boolean; mikeAddress: boolean; maryAddress: boolean }>({ 
     mike: false, 
     mary: false,
     mikeAddress: false,
     maryAddress: false
   });
-  const [addresses, setAddresses] = useState<{ mike: string; mary: string }>({ mike: "", mary: "" });
+  const [addresses, setAddresses] = useState<{ mike: string; mary: string }>(() => ({
+    mike: storage.getMikeAddress(),
+    mary: storage.getMaryAddress()
+  }));
 
   const generateWalletName = (type: WalletType) => {
     const prefix = type === WalletType.MINER ? "miner" : "merchant";
@@ -38,6 +59,13 @@ const Adventure = () => {
       setIsLoading(prev => ({ ...prev, [loadingKey]: true }));
       const { address } = await createAddress(walletName, addressName);
       console.log("Address created:", address);
+      
+      if (type === 'mike') {
+        storage.setMikeAddress(address);
+      } else {
+        storage.setMaryAddress(address);
+      }
+      
       setAddresses(prev => ({ ...prev, [type]: address }));
     } catch (error) {
       console.error(`Failed to create address for ${type}:`, error);
@@ -56,9 +84,11 @@ const Adventure = () => {
 
       if (type === WalletType.MINER) {
         setMikeWallet(walletId);
+        storage.setMikeWallet(walletId);
         console.log("Mike's wallet created:", walletId);
       } else {
         setMaryWallet(walletId);
+        storage.setMaryWallet(walletId);
         console.log("Mary's wallet created:", walletId);
       }
     } catch (error) {
@@ -69,23 +99,42 @@ const Adventure = () => {
     }
   };
   
-  const handleBalanceChange = (amount: number) => {
-    setBalance(amount);
+  const handleMikeBalanceChange = (amount: number) => {
+    setMikeBalance(amount);
+    storage.setMikeBalance(amount);
+  };
+  
+  const handleMaryBalanceChange = (amount: number) => {
+    setMaryBalance(amount);
+    storage.setMaryBalance(amount);
   };
 
   const handleEnergyCostChange = (amount: number) => {
     setEnergyCost(prev => prev + amount);
   };
 
-  const handlePurchase = (transaction: Transaction) => {
+  const handlePurchase = (transaction: MempoolTransaction) => {
     setPendingTransaction(transaction);
+    storage.addTransaction(transaction);
   };
 
-  const handleTransactionConfirmed = (transaction: Transaction) => {
-    // Update balance after transaction is confirmed
-    setBalance(transaction.change);
+  const handleReset = () => {
+    // Clear all storage
+    storage.clearAll();
+    
+    // Reset all state
+    setMikeBalance(0);
+    setMaryBalance(0);
+    setEnergyCost(0);
     setPendingTransaction(null);
+    setShowMempoolViewer(false);
+    setShowTransactionViewer(false);
+    setMikeWallet(null);
+    setMaryWallet(null);
+    setAddresses({ mike: "", mary: "" });
+    setIsLoading({ mike: false, mary: false, mikeAddress: false, maryAddress: false });
   };
+
 
   return (
     <div className="container mx-auto px-4 min-h-screen">
@@ -157,13 +206,18 @@ const Adventure = () => {
           </div>
           <div className="p-6">
             <MiningSection
-              balance={balance}
+              mikeBalance={mikeBalance}
               energyCost={energyCost}
-              onBalanceChange={handleBalanceChange}
+              onMikeBalanceChange={handleMikeBalanceChange}
+              onMaryBalanceChange={handleMaryBalanceChange}
               onEnergyCostChange={handleEnergyCostChange}
               mikeAddress={addresses.mike}
               maryAddress={addresses.mary}
               mikeWallet={mikeWallet}
+              maryWallet={maryWallet}
+              onViewMempool={() => setShowMempoolViewer(true)}
+              onViewTransaction={() => setShowTransactionViewer(true)}
+              hasPendingTransaction={pendingTransaction !== null}
             />
           </div>
         </div>
@@ -216,8 +270,13 @@ const Adventure = () => {
           </div>
           <div className="p-6">
             <MarysStand
-              balance={balance}
+              balance={mikeBalance}
+              mikeWallet={mikeWallet}
+              maryWallet={maryWallet}
+              maryAddress={addresses.mary}
               onPurchase={handlePurchase}
+              onBalanceChange={setMaryBalance}
+              maryBalance={maryBalance}
             />
           </div>
         </div>
@@ -225,9 +284,19 @@ const Adventure = () => {
 
       {/* Mempool Viewer - Modal */}
       <MempoolViewer
-        transaction={pendingTransaction}
-        onTransactionConfirmed={handleTransactionConfirmed}
+        walletName={mikeWallet || ''}
+        txid={showMempoolViewer ? pendingTransaction?.txid || null : null}
+        onClose={() => setShowMempoolViewer(false)}
       />
+
+      {/* Transaction Viewer - Modal */}
+      <TransactionViewer
+        walletName={mikeWallet || ''}
+        txid={showTransactionViewer ? pendingTransaction?.txid || null : null}
+        onClose={() => setShowTransactionViewer(false)}
+      />
+
+
 
       {/* Success Message - Small overlay */}
       {pendingTransaction?.status === 'confirmed' && (

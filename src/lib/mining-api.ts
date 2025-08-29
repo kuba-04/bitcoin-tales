@@ -1,3 +1,5 @@
+const API_URL = import.meta.env.VITE_API_URL;
+
 // Types
 export enum WalletType {
   MINER = "Miner",
@@ -67,9 +69,9 @@ export const MENU_ITEMS: MenuItem[] = [
   }
 ];
 
-// Mock API functions
+
 export const createWallet = async (name: string): Promise<{ walletId: string }> => {
-  const response = await fetch('http://127.0.0.1:8021/wallet', {
+  const response = await fetch(`${API_URL}/wallet`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -88,7 +90,7 @@ export const createWallet = async (name: string): Promise<{ walletId: string }> 
 
 export const mineBlock = async (walletName: string, address: string, blocks: number = 101): Promise<MiningResult> => {
   try {
-    const response = await fetch('http://127.0.0.1:8021/mine', {
+    const response = await fetch(`${API_URL}/mine`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -125,7 +127,7 @@ export const createTransaction = async (
   amount: number,
   itemName: string
 ): Promise<string> => {
-  const response = await fetch('http://127.0.0.1:8021/send', {
+  const response = await fetch(`${API_URL}/send`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -148,7 +150,7 @@ export const createTransaction = async (
 };
 
 export const createAddress = async (walletName: string, addressName: string): Promise<{ address: string }> => {
-  const response = await fetch('http://127.0.0.1:8021/address', {
+  const response = await fetch(`${API_URL}/address`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -169,7 +171,7 @@ export const createAddress = async (walletName: string, addressName: string): Pr
 
 export const getWalletBalance = async (walletName: string): Promise<number> => {
   try {
-    const response = await fetch(`http://127.0.0.1:8021/wallet/${walletName}/balance`, {
+    const response = await fetch(`${API_URL}/wallet/${walletName}/balance`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -193,7 +195,7 @@ export const checkMempoolTransaction = async (
   txid: string
 ): Promise<MempoolTransaction | null> => {
   console.log('checkMempoolTransaction: Making request to /mempool/' + walletName + '/' + txid);
-  const response = await fetch(`http://127.0.0.1:8021/mempool/${walletName}/${txid}`, {
+  const response = await fetch(`${API_URL}/mempool/${walletName}/${txid}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -221,7 +223,7 @@ export const getConfirmedTransaction = async (
   txid: string
 ): Promise<MempoolTransaction> => {
   console.log('getConfirmedTransaction: Making request to /tx/' + txid);
-  const response = await fetch(`http://127.0.0.1:8021/tx/${walletName}/${txid}`, {
+  const response = await fetch(`${API_URL}/tx/${walletName}/${txid}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',

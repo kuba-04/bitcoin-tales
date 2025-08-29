@@ -50,11 +50,6 @@ export const MarysStand = ({ balance, mikeWallet, maryWallet, maryAddress, onPur
       onBalanceChange(newBalance);
     } catch (error) {
       console.error('Failed to refresh balance:', error);
-      toast({
-        title: "Error",
-        description: "Failed to refresh Mary's balance",
-        variant: "destructive",
-      });
     } finally {
       setIsRefreshing(false);
     }

@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, Bitcoin, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useDisplayStore } from '@/lib/utils';
 import { Switch } from './switch';
+import GitHubLink from '@/components/GitHubLink';
 import { storage } from '@/lib/storage';
 import {
   AlertDialog,
@@ -80,6 +81,7 @@ export function TimelineNav() {
           </div>
 
           <div className="flex items-center gap-2">
+            <GitHubLink />
             <div className="flex items-center gap-2 mr-2">
               <Bitcoin className="h-4 w-4" />
               <Switch

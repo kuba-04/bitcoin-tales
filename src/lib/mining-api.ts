@@ -88,7 +88,7 @@ export const createWallet = async (name: string): Promise<{ walletId: string }> 
   return { walletId: data.name };
 };
 
-export const mineBlock = async (walletName: string, address: string, blocks: number = 101): Promise<MiningResult> => {
+export const mineBlock = async (walletName: string, address: string, blocks: number = 1): Promise<MiningResult> => {
   try {
     const response = await fetch(`${API_URL}/mine`, {
       method: 'POST',

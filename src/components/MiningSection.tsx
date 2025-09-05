@@ -38,7 +38,7 @@ export const MiningSection = ({
 }: MiningSectionProps) => {
   const [isMining, setIsMining] = useState(false);
   const [miningProgress, setMiningProgress] = useState(0);
-  const [blocks, setBlocks] = useState(101);
+  const [blocks, setBlocks] = useState(1);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleRefreshBalance = async () => {

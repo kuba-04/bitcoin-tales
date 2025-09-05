@@ -37,35 +37,35 @@ export const MENU_ITEMS: MenuItem[] = [
     name: 'Mango Salad',
     price: 20_000,
     description: 'A refreshing and exotic treat',
-    image: '/assets/mangosalad.jpg'
+    image: 'mangosalad.jpg'
   },
   {
     id: 'banana-bread',
     name: 'Banana Bread',
     price: 12_000,
     description: 'A hearty and comforting loaf',
-    image: '/assets/bananabread.jpg'
+    image: 'bananabread.jpg'
   },
   {
     id: 'corn-tortillas',
     name: 'Corn Tortillas',
     price: 8_000,
     description: 'A simple and savory snack',
-    image: '/assets/tortillas.webp'
+    image: 'tortillas.webp'
   },
   {
     id: 'apple-pie',
     name: 'Apple Pie',
     price: 15_000,
     description: 'A classic, sweet indulgence',
-    image: '/assets/applepie.webp'
+    image: 'applepie.webp'
   },
   {
     id: 'hummus',
     name: 'Hummus',
     price: 4_000,
     description: 'A healthy and flavorful dip',
-    image: '/assets/hummus.webp'
+    image: 'hummus.webp'
   }
 ];
 

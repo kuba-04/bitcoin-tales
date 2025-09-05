@@ -25,7 +25,7 @@ const Merchant = () => {
                 personal touch of a community vendor.
               </p>
 
-              <img src="/assets/mary.jpg" alt="Mary the Merchant" className="w-full h-64 object-cover mb-4 mt-10" />
+              <img src="mary.jpg" alt="Mary the Merchant" className="w-full h-64 object-cover mb-4 mt-10" />
 
             </Card>
           </div>

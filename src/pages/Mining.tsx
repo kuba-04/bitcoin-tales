@@ -77,7 +77,7 @@ const Mining = () => {
               loop
               muted
             >
-              <source src="../assets/mining.mp4" type="video/mp4" />
+              <source src="mining.mp4" type="video/mp4" />
               Your browser does not support the video tag.
             </video>
             </Card>

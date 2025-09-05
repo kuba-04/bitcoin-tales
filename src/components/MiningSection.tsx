@@ -110,7 +110,7 @@ export const MiningSection = ({
   return (
     <Card className="p-3">
       <div className="flex justify-center text-xs">
-        <img src="../assets/mining-machine.png" alt="mining machine" className="h-20 mb-2 mt-2 mx-auto block" />
+        <img src="mining-machine.png" alt="mining machine" className="h-20 mb-2 mt-2 mx-auto block" />
       </div>
       <div className="space-y-3">
         <div className="grid grid-cols-2 gap-2 text-sm">

@@ -161,7 +161,7 @@ const Adventure = () => {
         <div className="bg-card/50 backdrop-blur-sm border rounded-xl shadow-lg overflow-hidden">
           <div className="p-6 pb-4 border-b bg-muted/30">
             <h2 className="text-2xl font-semibold">Mike's Mining Operations Ltd.</h2>
-            <img src="../assets/mike_face_c.png" alt="Mike" className="h-30 mb-4 mt-10 mx-auto block" />
+            <img src="mike_face_c.png" alt="Mike" className="h-30 mb-4 mt-10 mx-auto block" />
             <span className="mt-2 text-sm text-muted-foreground leading-relaxed">
             All that mining activity made Mike incredibly hungry. Fortunately, not far from him a Mary's stand is located.
               Help Mike mine Bitcoin by operating his powerful computers. But be careful - 
@@ -226,7 +226,7 @@ const Adventure = () => {
         <div className="bg-card/50 backdrop-blur-sm border rounded-xl shadow-lg overflow-hidden">
           <div className="p-6 pb-4 border-b bg-muted/30">
             <h2 className="text-2xl font-semibold">Mary's Fresh & Local Stand</h2>
-            <img src="../assets/mary_face_c.png" alt="Mary" className="h-30 mb-4 mt-10 mx-auto block" />
+            <img src="mary_face_c.png" alt="Mary" className="h-30 mb-4 mt-10 mx-auto block" />
             <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
               Mary offers a variety of healthy and delicious goods.
               Help Mike choose something from her stand.
